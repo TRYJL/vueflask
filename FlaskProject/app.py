@@ -1,23 +1,24 @@
 from flask import Flask, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS  # 允许跨域
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
 
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
+from upload import upload_bp
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 app.secret_key = SECRET_KEY
-
 db = SQLAlchemy(app)
 CORS(app, supports_credentials=True)  # 启用跨域支持 + 允许携带cookie
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-
 with app.app_context():
     db.create_all()
+
+app.register_blueprint(upload_bp, url_prefix='/upload')
+
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
@@ -55,4 +56,4 @@ def api_user():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0', port=5000)
